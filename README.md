@@ -14,8 +14,8 @@ from pysqlcrypt import encrypt_by_passphrase, decrypt_by_passphrase, SQLCryptVer
 # Encrypt
 ciphertext = encrypt_by_passphrase("passphrase", "plaintext", SQLCryptVersion.V2)
 
-# Decrypt
-plaintext = decrypt_by_passphrase("passphrase", ciphertext, encoding="utf-8")
+# Decrypt with auto-detection (recommended)
+plaintext = decrypt_by_passphrase("passphrase", ciphertext, encoding="auto")
 ```
 
 ## API
@@ -28,6 +28,15 @@ Returns encrypted bytes. Use `SQLCryptVersion.V1` for SQL Server 2008-2016, `SQL
 
 Returns decrypted bytes, or str if `encoding` is specified. Accepts bytes or hex string (with or without `0x` prefix).
 
+## Encoding Options
+
+| Value | Behavior |
+|-------|----------|
+| `None` | Returns raw bytes |
+| `"auto"` | Auto-detects UTF-16LE (NVARCHAR) vs UTF-8 |
+| `"utf-8"` | Decodes as UTF-8 (VARCHAR) |
+| `"utf-16-le"` | Decodes as UTF-16LE (NVARCHAR) |
+
 ## Version Reference
 
 | Version | SQL Server | Algorithm |
@@ -37,7 +46,7 @@ Returns decrypted bytes, or str if `encoding` is specified. Accepts bytes or hex
 
 ## Notes
 
-- For NVARCHAR compatibility, use `encoding="utf-16-le"`
+- Use `encoding="auto"` for mixed VARCHAR/NVARCHAR data
 - The `authenticator` parameter embeds additional context data for verification
 - Decryption auto-detects the version from the ciphertext header
 

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "pysqlcrypt"
-version = "0.1.0"
+version = "0.2.0"
 description = "Python implementation of SQL Server's ENCRYPTBYPASSPHRASE and DECRYPTBYPASSPHRASE"
 readme = "README.md"
 license = "MIT"

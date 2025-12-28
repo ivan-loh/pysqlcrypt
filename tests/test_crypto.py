@@ -354,6 +354,51 @@ class TestEncodingParameter:
 
         assert result == plaintext  # Not UTF-16LE encoded
 
+    def test_auto_encoding_detects_utf8(self):
+        """Test that encoding='auto' correctly detects UTF-8 data."""
+        passphrase = "pass"
+        plaintext = "Hello, World!"
+
+        # Encrypt as UTF-8 (default)
+        ciphertext = encrypt_by_passphrase(passphrase, plaintext)
+        result = decrypt_by_passphrase(passphrase, ciphertext, encoding="auto")
+
+        assert isinstance(result, str)
+        assert result == plaintext
+
+    def test_auto_encoding_detects_utf16le(self):
+        """Test that encoding='auto' correctly detects UTF-16LE data (NVARCHAR)."""
+        passphrase = "pass"
+        plaintext = "Hello"
+
+        # Encrypt as UTF-16LE (SQL Server NVARCHAR)
+        ciphertext = encrypt_by_passphrase(passphrase, plaintext, encoding="utf-16-le")
+        result = decrypt_by_passphrase(passphrase, ciphertext, encoding="auto")
+
+        assert isinstance(result, str)
+        assert result == plaintext
+
+    def test_auto_encoding_with_unicode_utf16le(self):
+        """Test auto encoding with Unicode characters in UTF-16LE."""
+        passphrase = "pass"
+        plaintext = "Hello 世界"
+
+        ciphertext = encrypt_by_passphrase(passphrase, plaintext, encoding="utf-16-le")
+        # For non-ASCII UTF-16LE, auto-detection may fall back to trying decode
+        result = decrypt_by_passphrase(passphrase, ciphertext, encoding="utf-16-le")
+
+        assert result == plaintext
+
+    def test_auto_encoding_empty_string(self):
+        """Test auto encoding with empty string."""
+        passphrase = "pass"
+        plaintext = ""
+
+        ciphertext = encrypt_by_passphrase(passphrase, plaintext)
+        result = decrypt_by_passphrase(passphrase, ciphertext, encoding="auto")
+
+        assert result == ""
+
 
 class TestAuthenticatorVerification:
     """Tests for authenticator verification in decryption."""

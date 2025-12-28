@@ -4,10 +4,41 @@ import hashlib
 import os
 import struct
 from enum import IntEnum
-from typing import Optional, Union, overload
+from typing import Literal, Optional, Union, overload
 
 from Crypto.Cipher import AES, DES3
 from Crypto.Util.Padding import pad, unpad
+
+
+def _detect_encoding(data: bytes) -> str:
+    """Detect encoding of decrypted bytes.
+
+    Returns the most likely encoding based on byte patterns:
+    - UTF-16LE: Alternating null bytes (common for SQL Server NVARCHAR)
+    - UTF-8: Valid UTF-8 sequences
+    - latin-1: Fallback (always succeeds)
+    """
+    if len(data) == 0:
+        return "utf-8"
+
+    # Check for UTF-16LE pattern: ASCII chars have null byte after each char
+    # e.g., "Hello" = b'H\x00e\x00l\x00l\x00o\x00'
+    if len(data) >= 2 and len(data) % 2 == 0:
+        null_positions = [i for i in range(len(data)) if data[i] == 0]
+        # If every odd position is null, likely UTF-16LE ASCII
+        expected_nulls = list(range(1, len(data), 2))
+        if null_positions == expected_nulls:
+            return "utf-16-le"
+
+    # Try UTF-8
+    try:
+        data.decode("utf-8")
+        return "utf-8"
+    except UnicodeDecodeError:
+        pass
+
+    # Fallback to latin-1 (never fails)
+    return "latin-1"
 
 
 class SQLCryptVersion(IntEnum):
@@ -88,6 +119,16 @@ def decrypt_by_passphrase(
     ciphertext: Union[str, bytes],
     *,
     authenticator: Union[str, bytes, None] = None,
+    encoding: Literal["auto"],
+) -> str: ...
+
+
+@overload
+def decrypt_by_passphrase(
+    passphrase: str,
+    ciphertext: Union[str, bytes],
+    *,
+    authenticator: Union[str, bytes, None] = None,
     encoding: str,
 ) -> str: ...
 
@@ -131,4 +172,6 @@ def decrypt_by_passphrase(
         if exp != embedded_auth:
             raise ValueError("Authenticator mismatch")
 
+    if encoding == "auto":
+        return data.decode(_detect_encoding(data))
     return data.decode(encoding) if encoding else data
