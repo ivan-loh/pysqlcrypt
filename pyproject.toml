@@ -1,0 +1,84 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "pysqlcrypt"
+version = "0.1.0"
+description = "Python implementation of SQL Server's ENCRYPTBYPASSPHRASE and DECRYPTBYPASSPHRASE"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+authors = [
+    { name = "Ivan", email = "warm.tiger5970@fastmail.com" },
+]
+keywords = [
+    "sql-server",
+    "mssql",
+    "encryption",
+    "decryption",
+    "encryptbypassphrase",
+    "decryptbypassphrase",
+    "3des",
+    "aes",
+]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Typing :: Typed",
+    "Topic :: Security :: Cryptography",
+    "Topic :: Database",
+]
+dependencies = [
+    "pycryptodome>=3.19.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0.0",
+    "pytest-cov>=4.0.0",
+    "ruff>=0.1.0",
+    "mypy>=1.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/ivan-loh/pysqlcrypt"
+Documentation = "https://github.com/ivan-loh/pysqlcrypt#readme"
+Repository = "https://github.com/ivan-loh/pysqlcrypt"
+Issues = "https://github.com/ivan-loh/pysqlcrypt/issues"
+
+[tool.hatch.build.targets.sdist]
+include = [
+    "/src",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/pysqlcrypt"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+target-version = "py39"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+# Allow long lines in test files for hex test vectors
+"tests/*.py" = ["E501"]
+
+[tool.mypy]
+python_version = "3.9"
+warn_return_any = true
+warn_unused_ignores = true
